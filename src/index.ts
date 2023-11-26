@@ -87,14 +87,18 @@ const collectLocations = (area: Area, checks: string[]) => {
                 fullReqs = reqs;
             }
             if (location.includes('\\')) {
+                // console.log(`Hey, ${location} is a macro!`)
                 updateMacro(splitFirstPathSegment(location)[1], fullReqs);
-            } else if (!checks.includes(location)) {
+            } else if (!checks.includes(`${area.name}\\${location}`)) {
+                // console.log(`Hey, ${location} is a macro!`)
                 if (location.includes('\\')) {
-                    updateMacro(splitFirstPathSegment(location)[1], fullReqs);
+                    // THIS NEVER SEEMS TO ACTUALLY HAPPEN
+                    updateMacro(`${splitFirstPathSegment(area.name)[1]}\\${location}`, fullReqs);
                 } else {
-                    updateMacro(`${area.name}\\${location}`, fullReqs);
+                    updateMacro(`${splitFirstPathSegment(area.name)[1]}\\${location}`, fullReqs);
                 }
             } else {
+                // console.log(`Hey, ${location} is a location!`)
                 updateLocation(
                     `${splitFirstPathSegment(area.name)[1]}\\${location}`,
                     fullReqs,
@@ -114,7 +118,7 @@ const collectLocations = (area: Area, checks: string[]) => {
         }
         if (exit.includes('\\')) {
             updateMacro(
-                `${splitFirstPathSegment(area.name)}\\Exit to ${
+                `${splitFirstPathSegment(area.name)[1]}\\Exit to ${
                     rsplit(exit, '\\', 1)[1]
                 }`,
                 fullReqs,
@@ -161,10 +165,10 @@ const loadLogicDump = async () => {
                 parts.forEach((part) => {
                     destArea = destArea.sub_areas[part];
                 });
-                destArea.entrances.push(`Entrance from ${area.name}`);
+                destArea.entrances.push(`Entrance from ${rsplit(area.name, '\\', 1)[1]}`);
                 updateMacro(
-                    `${area.name}\\Entrance from ${area.name}`,
-                    `${area.name}\\Exit to ${rsplit(exit, '\\', 1)[1]}`,
+                    `${splitFirstPathSegment(destArea.name)[1]}\\Entrance from ${rsplit(area.name, '\\', 1)[1]}`,
+                    `${splitFirstPathSegment(area.name)[1]}\\Exit to ${rsplit(exit, '\\', 1)[1]}`,
                 );
             }
         });
@@ -182,11 +186,12 @@ const loadLogicDump = async () => {
     //         ].entrances,
     //     ),
     // );
+    // console.log(_.keys(dump.checks));
     collectLocations(dump.areas, _.keys(dump.checks));
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    console.log(topMacros.get('Ancient Cistern').get('Main').get('Main Room'));
-    // console.log(topLocations);
+    console.log(topMacros.get('Ancient Cistern').get('Main').get('Main Room').get('After Whip Hooks'));
+    // console.log(topLocations.get('Ancient Cistern')?.get('Main'));
 
     // const startEntrance = findConnectingEntrance('\\Start')?.slice(1);
 
